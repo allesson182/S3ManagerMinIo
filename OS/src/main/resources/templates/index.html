@@ -1,0 +1,227 @@
+<!DOCTYPE HTML>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>DropBox</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+  <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+  <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        #principal{
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        #texto-mensagem {
+            margin-bottom: 2rem;
+            color: #525252;
+            padding: 1rem 1.5rem;
+            border: 0;
+            font-size: .875rem;
+            border-radius: 0.25rem;
+
+            background-color: #973a3a42;
+            border-color: #7f525242;
+        }
+
+
+
+
+
+        #botao-download {
+            color: #198754;
+            font-size: 19px;
+            margin-left: 10px;
+
+        }
+
+
+
+        #botao-trash {
+            color: #dc3545;
+
+            font-size: 19px;
+            margin-left: 10px;
+
+        }
+
+
+
+        #botao-edit {
+            color: #0d6efd;
+
+
+            font-size: 19px;
+            margin-left: 10px;
+
+        }
+
+        ;
+
+        .btn {
+            position: relative;
+            text-transform: uppercase;
+            will-change: transform;
+            letter-spacing: .025em;
+            font-size: .875rem;
+            color: #fff;
+            background-color: #f5365c;
+            border: 1px solid transparent;
+            border-color: #f5365c;
+            box-shadow: 0 4px 6px rgb(50 50 93 / 11%), 0 1px 3px rgb(0 0 0 / 8%);
+            font-weight: 600;
+            text-align: center;
+            vertical-align: middle;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            padding: 0.625rem 1.25rem;
+            line-height: 1.5;
+            border-radius: 0.25rem;
+            transition: all .15s ease;
+        }
+
+        .btn:hover {
+            background-color: #df2e51;
+            color: #fff;
+        }
+
+        #file {
+            width: 100%;
+            color: #8898aa;
+            background-color: #fff;
+            background-clip: padding-box;
+            box-shadow: 0 15px 35px rgba(50, 50, 93, .1), 0 5px 15px rgba(0, 0, 0, .07) !important;
+            border: 0.0625rem solid rgba(0, 0, 0, .05);
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        #tabela {
+            color: #ffffff;
+            background-color: #fff;
+            background-clip: padding-box;
+            box-shadow: 0 15px 35px rgba(50, 50, 93, .1), 0 5px 15px rgba(0, 0, 0, .07) !important;
+            border: 0.0625rem solid rgba(82, 79, 79, 0.993);
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top">
+  <div class="container">
+    <a class="navbar-brand" href="/">DropBox</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+            aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div id="principal" class="container">
+  <div class="row">
+    <div class="col-lg-8 mt-5">
+
+      <div th:if="${message}">
+        <h2 th:text="${message}" />
+      </div>
+
+      <div id="dropzone" class="card-body">
+        <form METHOD="post" action="/arquivo" class="dropzone needsclick" id="file" name="file"
+              enctype="multipart/form-data">
+
+          <div class="dz-message needsclick">
+            <button type="button" class="dz-button">Arraste arquivos aqui ou clique para fazer
+              upload.</button>
+            <br />
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+
+  <div class="contatiner col-sm-8 col-md-12 col-md-offset-2">
+    <div th:if="${#lists.isEmpty(listaArquivos)}" id="texto-mensagem">Nenhum arquivo adicionado</div>
+    <table id="tabela" class="table table-dark">
+      <tr>
+        <th>Nome</th>
+        <th>data upload</th>
+        <th>Tamanho</th>
+        <th>Ações</th>
+      </tr>
+      <tr th:each="cont : ${listaArquivos}">
+        <td><span id="nome" th:text="${cont.objectName()}"></span></td>
+        <td th:text="${cont.lastModified}"></td>
+        <td> <span class="size" th:text="${cont.size()} + kb"></span></td>
+        <td><a th:href="@{/deletararquivo(nome=${cont.objectName()})}"><i id="botao-trash"
+                                                                      class="bi bi-trash"></i></a>
+          <a th:href="@{/baixararquivo(nome=${cont.objectName})}"><i id="botao-download"
+                                                                   class="bi bi-download"></i></a>
+        </td>
+      </tr>
+    </table>
+    <hr />
+  </div>
+</div>
+
+
+<script src="https://unpkg.com/@popperjs/core@2/dist/umd/popper.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+        integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+        crossorigin="anonymous"></script>
+<script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
+
+
+<script>
+
+  Dropzone.autoDiscover = false;
+
+  $("#file").dropzone({
+    success: function (file, response) {
+      toastr.success('File ' + file.name + ' uploaded successfully');
+      document.location.reload(true);
+    }
+  });
+
+        document.getElementById("file").addEventListener("submit", ev => console.log("foi"+ev.type))
+
+        function bytesToSize(bytes) {
+
+            var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            if (bytes == 0) return '0 Byte';
+            var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+            return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+        }
+
+        const collection = document.getElementsByClassName("size");
+        for (let i = 0; i < collection.length; i++) {
+            collection.item(i).innerHTML = bytesToSize(collection.item(i).outerHTML.toString().replace(/\D/g, ""))
+        }
+
+</script>
+
+</body>
+
+</html>
