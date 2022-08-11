@@ -6,6 +6,8 @@ import io.minio.messages.Bucket;
 import io.minio.messages.Item;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -68,5 +70,10 @@ public class StorageService {
         File localFile = new File(this.raiz+"/arquivos/"+nome);
         minio.downloadObject(
                 DownloadObjectArgs.builder().bucket("buckettest").object(nome).filename(localFile.getAbsolutePath()).build());
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void onStartCreateBucket() throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+        minio.makeBucket(MakeBucketArgs.builder().bucket("buckettest").build());
     }
 }
